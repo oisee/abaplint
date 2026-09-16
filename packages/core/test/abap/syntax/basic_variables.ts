@@ -2175,4 +2175,31 @@ DATA(res) = cha && cha.`;
     expect(identifier!.getType()).to.be.instanceof(Basic.IntegerType);
   });
 
+
+  // The numeric functions abs, ceil, floor, frac, sign and trunc return a
+  // value of the type of their argument (ABAP keyword documentation,
+  // "Numeric Functions"): frac of a float is a float, and of an integer an
+  // integer. The built-in table declared all six as integers, so an inline
+  // declaration from frac( f ) was typed i and the transpiled program
+  // rounded a fraction to 0 or 1.
+  it("inline DATA from frac( f ) is a float", () => {
+    const abap = `DATA time TYPE f.
+  DATA(phase) = frac( time ).`;
+    const type = resolveVariable(abap, "phase")?.getType();
+    expect(type).to.be.instanceof(Basic.FloatType);
+  });
+
+  it("inline DATA from abs( f ) is a float", () => {
+    const abap = `DATA dist TYPE f.
+  DATA(d) = abs( dist ).`;
+    const type = resolveVariable(abap, "d")?.getType();
+    expect(type).to.be.instanceof(Basic.FloatType);
+  });
+
+  it("inline DATA from frac( i ) stays an integer", () => {
+    const abap = `DATA n TYPE i.
+  DATA(r) = frac( n ).`;
+    const type = resolveVariable(abap, "r")?.getType();
+    expect(type).to.be.instanceof(Basic.IntegerType);
+  });
 });
